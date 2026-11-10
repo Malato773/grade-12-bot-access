@@ -703,3 +703,23 @@ export const adminExamBotEntries = createServerFn({ method: "POST" })
     const list = (rows ?? []).flatMap((r) => { try { return [JSON.parse(r.value) as { telegram_handle: string; full_name: string; section: string; entered_at: string }]; } catch { return []; } });
     return list.sort((a, b) => b.entered_at.localeCompare(a.entered_at));
   });
+
+// ---------- Setup status: reports only whether each key is present and working, never values ----------
+export const getSetupStatus = createServerFn({ method: "GET" }).handler(async () => {
+  const has = (k: string) => !!process.env[k];
+  const keys = {
+    database: (has("SUPABASE_URL") || has("VITE_SUPABASE_URL")) && (has("SUPABASE_SERVICE_ROLE_KEY") || has("DB_SERVICE_ROLE_KEY")),
+    admin_login: has("ADMIN_USERNAME") && has("ADMIN_PASSWORD"),
+    session: has("ADMIN_SESSION_SECRET"),
+    bot: has("TELEGRAM_BOT_TOKEN"),
+  };
+  let databaseWorks = false;
+  if (keys.database) {
+    try { const db = await getDb(); const { error } = await db.from("app_settings").select("key").limit(1); databaseWorks = !error; } catch { databaseWorks = false; }
+  }
+  let botWorks = false;
+  if (keys.bot) {
+    try { const r = await fetch(`https://api.telegram.org/bot${process.env["TELEGRAM_BOT_TOKEN"]}/getMe`); botWorks = ((await r.json()) as { ok?: boolean }).ok === true; } catch { botWorks = false; }
+  }
+  return { ...keys, databaseWorks, botWorks };
+});
