@@ -656,3 +656,46 @@ export const adminResetExamPick = createServerFn({ method: "POST" })
     await db.from("app_settings").delete().eq("key", "exam_test_picked_at");
     return { ok: true };
   });
+
+// ---------- Grade 12 exam portal bot link ----------
+export const EXAM_PORTAL_BOT = "BHSSS_EXAM_PORTAL_BOT";
+
+/** Step 1: the typed name must be a Grade 12 student on the roster. */
+export const checkGrade12Name = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ name: z.string().trim().min(3).max(120) }).parse(d))
+  .handler(async ({ data }) => {
+    const { students } = await loadRoster();
+    const s = students.find((x) => x.grade === "12" && normalizeName(x.name) === normalizeName(data.name));
+    if (!s) return { ok: false as const };
+    return { ok: true as const, name: s.name, section: s.section };
+  });
+
+/** Step 2: the Telegram username must have started the school bot; then the exam bot link is revealed. */
+export const enterExamPortalBot = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ name: z.string().trim().min(3).max(120), handle }).parse(d))
+  .handler(async ({ data }) => {
+    const { students } = await loadRoster();
+    const s = students.find((x) => x.grade === "12" && normalizeName(x.name) === normalizeName(data.name));
+    if (!s) return { ok: false as const, reason: "not_grade12" as const };
+    const db = await getDb();
+    const bare = data.handle.replace(/^@/, "");
+    const { data: users } = await db.from("telegram_users").select("chat_id,username").ilike("username", bare).limit(1);
+    const u = users?.[0];
+    if (!u) return { ok: false as const, reason: "not_in_bot" as const };
+    const { error } = await db.from("exam_bot_entries").upsert(
+      { telegram_handle: `@${u.username ?? bare}`, full_name: s.name, section: s.section, chat_id: u.chat_id },
+      { onConflict: "telegram_handle" },
+    );
+    if (error) console.error("exam_bot_entries save failed", error);
+    return { ok: true as const, name: s.name, link: `https://t.me/${EXAM_PORTAL_BOT}` };
+  });
+
+export const adminExamBotEntries = createServerFn({ method: "POST" })
+  .inputValidator((d) => tokenSchema.parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.token);
+    const db = await getDb();
+    const { data: rows, error } = await db.from("exam_bot_entries").select("*").order("entered_at", { ascending: false });
+    if (error) throw new Error("Could not load entries");
+    return rows ?? [];
+  });
