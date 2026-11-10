@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792086392310,
+      "tag": "0000_portal_schema_with_attempts",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792190436088,
+      "tag": "0001_roster_overrides_and_bot_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793497839379,
+      "tag": "0002_notification_history_and_registration_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793760118805,
+      "tag": "0003_exam_testers",
+      "breakpoints": true
+    }
+  ]
+}
