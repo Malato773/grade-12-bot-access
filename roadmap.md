@@ -5,3 +5,6 @@
 - [x] Verify signed-in admin views, profile saving, saved registrations, delivery tests, and existing parent rules; no unsolicited live bot message sent.
 - [x] Remove bright button fills behind icons and labels in the Security, Parents and admin login views so every action stays readable.
 - [ ] Publish, then redeploy on Vercel so the Broadcast tab, records pages and icon fixes reach the live site.- [x] Grade 12 exam portal tester sign-up (5 each from 12A, 12B, 12C), random pick at deadline, admin results, Telegram message to picked students.
+
+- [x] Grade 12 exam portal bot page (name → Telegram username → @BHSSS_EXAM_PORTAL_BOT link) with admin "exam bot" list.
+- [ ] Add server keys (service key, admin login, bot token) to this project so it can reach the existing database.
