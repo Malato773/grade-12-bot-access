@@ -7,9 +7,10 @@ import { StudentFlow } from "@/components/portal/StudentFlow";
 import { TeacherFlow } from "@/components/portal/TeacherFlow";
 import { ParentFlow } from "@/components/portal/ParentFlow";
 import { ExamTestFlow } from "@/components/portal/ExamTestFlow";
+import { ExamBotFlow } from "@/components/portal/ExamBotFlow";
 import { AdminArea } from "@/components/portal/AdminArea";
 import { GlassIcon } from "@/components/portal/GlassIcon";
-import { ClipboardCheck, GraduationCap, Presentation, Users, ShieldCheck, type LucideIcon } from "lucide-react";
+import { ClipboardCheck, GraduationCap, Presentation, Users, ShieldCheck, Bot, type LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,12 +26,13 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "student" | "teacher" | "parent" | "examtest" | "admin";
+type Tab = "student" | "teacher" | "parent" | "examtest" | "exambot" | "admin";
 const TABS: { id: Tab; icon: LucideIcon; label: string; hint: string }[] = [
   { id: "student", icon: GraduationCap, label: "Students", hint: "Grade 9–12" },
   { id: "teacher", icon: Presentation, label: "Teachers", hint: "Staff roster" },
   { id: "parent", icon: Users, label: "Parents", hint: "Request access" },
   { id: "examtest", icon: ClipboardCheck, label: "Exam test", hint: "Grade 12 only" },
+  { id: "exambot", icon: Bot, label: "Exam portal", hint: "Grade 12 only" },
   { id: "admin", icon: ShieldCheck, label: "Admin", hint: "Dashboard" },
 ];
 
@@ -63,7 +65,7 @@ function Index() {
         <p className="mt-2 text-sm text-muted-foreground">Official Verification Portal</p>
       </header>
 
-      <nav className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <nav className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {TABS.filter((t) => t.id !== "examtest" || examVisible).map((t) => (
           <button
             key={t.id}
@@ -92,6 +94,7 @@ function Index() {
             This page is not available right now.
           </div>
         )}
+        {tab === "exambot" && <ExamBotFlow key="b" supportUrl={supportUrl} />}
         {tab === "admin" && <AdminArea key="a" onClose={() => setTab(null)} />}
       </main>
 

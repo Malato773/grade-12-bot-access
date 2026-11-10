@@ -1,6 +1,7 @@
 import { NotificationHistory, RegistrationHistory } from "./AdminRecords";
 import { BroadcastPanel } from "./AdminBroadcast";
 import { ExamTestPanel } from "./AdminExamTest";
+import { ExamBotEntriesPanel } from "./AdminExamBot";
 import { matchesAdminSearch } from "@/lib/admin-record-rules";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState } from "react";
@@ -10,9 +11,9 @@ import {
   adminLogin, adminGetData, adminUpdateSettings, adminDecideParent, adminResetStudent, adminTestBot, adminUnban, adminResolveAlert,
   adminDeleteParent, adminAddPerson, adminEditPerson, adminRemovePerson, adminUpdateStudentHandle,
 } from "@/lib/portal.functions";
-import { ShieldCheck, X, ShieldAlert, Plus, Pencil, Trash2, RotateCcw, AtSign, Users, GraduationCap, Presentation, CalendarClock, Bell, Megaphone, ClipboardCheck, Settings, type LucideIcon } from "lucide-react";
+import { ShieldCheck, X, ShieldAlert, Plus, Pencil, Trash2, RotateCcw, AtSign, Users, GraduationCap, Presentation, CalendarClock, Bell, Megaphone, ClipboardCheck, Settings, Bot, type LucideIcon } from "lucide-react";
 
-const TAB_ICONS: Record<string, LucideIcon> = { security: ShieldAlert, parents: Users, students: GraduationCap, teachers: Presentation, registrations: CalendarClock, notifications: Bell, broadcast: Megaphone, "exam test": ClipboardCheck, settings: Settings };
+const TAB_ICONS: Record<string, LucideIcon> = { security: ShieldAlert, parents: Users, students: GraduationCap, teachers: Presentation, registrations: CalendarClock, notifications: Bell, broadcast: Megaphone, "exam test": ClipboardCheck, "exam bot": Bot, settings: Settings };
 import { GlassIcon } from "./GlassIcon";
 
 type Data = Awaited<ReturnType<typeof adminGetData>>;
@@ -64,7 +65,7 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (t
   );
 }
 
-type View = "security" | "parents" | "students" | "teachers" | "registrations" | "notifications" | "broadcast" | "exam test" | "settings";
+type View = "security" | "parents" | "students" | "teachers" | "registrations" | "notifications" | "broadcast" | "exam test" | "exam bot" | "settings";
 
 function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   const get = useServerFn(adminGetData);
@@ -122,7 +123,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         <Stat label="Locked names" value={banned.length} />
       </div>
       <div className="tab-scroller mt-5 flex snap-x gap-2 overflow-x-auto rounded-2xl border bg-secondary/40 p-1.5">
-        {(["security", "parents", "students", "teachers", "registrations", "notifications", "broadcast", "exam test", "settings"] as View[]).map((v) => (
+        {(["security", "parents", "students", "teachers", "registrations", "notifications", "broadcast", "exam test", "exam bot", "settings"] as View[]).map((v) => (
           <Button key={v} variant="ghost" onClick={() => { setView(v); setQ(""); }} className={`shrink-0 snap-start gap-2 whitespace-nowrap rounded-xl text-sm capitalize ${view === v ? "glow bg-primary/15 text-primary hover:bg-primary/20" : "text-muted-foreground hover:text-foreground"}`}>{(() => { const I = TAB_ICONS[v]!; return <I size={16} />; })()}{v}{v === "security" && openAlerts.length > 0 ? ` (${openAlerts.length})` : ""}</Button>
         ))}
       </div>
@@ -139,6 +140,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         {view === "notifications" && <NotificationHistory token={token} />}
         {view === "broadcast" && <BroadcastPanel token={token} />}
         {view === "exam test" && <ExamTestPanel token={token} />}
+        {view === "exam bot" && <ExamBotEntriesPanel token={token} />}
         {(view === "parents" || view === "teachers") && <input className="field mb-3" aria-label="Search admin records" placeholder="Search name or Telegram username…" value={q} onChange={(e) => setQ(e.target.value)} />}
         {view === "security" && (
           <div className="space-y-5">

@@ -658,7 +658,8 @@ export const adminResetExamPick = createServerFn({ method: "POST" })
   });
 
 // ---------- Grade 12 exam portal bot link ----------
-export const EXAM_PORTAL_BOT = "BHSSS_EXAM_PORTAL_BOT";
+const EXAM_PORTAL_BOT = "BHSSS_EXAM_PORTAL_BOT";
+const EXAM_BOT_PREFIX = "exam_bot_entry:";
 
 /** Step 1: the typed name must be a Grade 12 student on the roster. */
 export const checkGrade12Name = createServerFn({ method: "POST" })
@@ -682,11 +683,13 @@ export const enterExamPortalBot = createServerFn({ method: "POST" })
     const { data: users } = await db.from("telegram_users").select("chat_id,username").ilike("username", bare).limit(1);
     const u = users?.[0];
     if (!u) return { ok: false as const, reason: "not_in_bot" as const };
-    const { error } = await db.from("exam_bot_entries").upsert(
-      { telegram_handle: `@${u.username ?? bare}`, full_name: s.name, section: s.section, chat_id: u.chat_id },
-      { onConflict: "telegram_handle" },
-    );
-    if (error) console.error("exam_bot_entries save failed", error);
+    // Stored in app_settings (key per handle) so no schema change is needed on the existing database.
+    const tg = `@${u.username ?? bare}`;
+    const { error } = await db.from("app_settings").upsert({
+      key: `${EXAM_BOT_PREFIX}${tg.toLowerCase()}`,
+      value: JSON.stringify({ telegram_handle: tg, full_name: s.name, section: s.section, chat_id: u.chat_id, entered_at: new Date().toISOString() }),
+    });
+    if (error) console.error("exam bot entry save failed", error);
     return { ok: true as const, name: s.name, link: `https://t.me/${EXAM_PORTAL_BOT}` };
   });
 
@@ -695,7 +698,8 @@ export const adminExamBotEntries = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertAdmin(data.token);
     const db = await getDb();
-    const { data: rows, error } = await db.from("exam_bot_entries").select("*").order("entered_at", { ascending: false });
+    const { data: rows, error } = await db.from("app_settings").select("value").like("key", `${EXAM_BOT_PREFIX}%`);
     if (error) throw new Error("Could not load entries");
-    return rows ?? [];
+    const list = (rows ?? []).flatMap((r) => { try { return [JSON.parse(r.value) as { telegram_handle: string; full_name: string; section: string; entered_at: string }]; } catch { return []; } });
+    return list.sort((a, b) => b.entered_at.localeCompare(a.entered_at));
   });
