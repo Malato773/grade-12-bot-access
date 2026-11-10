@@ -2,6 +2,7 @@ import { NotificationHistory, RegistrationHistory } from "./AdminRecords";
 import { BroadcastPanel } from "./AdminBroadcast";
 import { ExamTestPanel } from "./AdminExamTest";
 import { ExamBotEntriesPanel } from "./AdminExamBot";
+import { SetupStatus } from "./SetupStatus";
 import { matchesAdminSearch } from "@/lib/admin-record-rules";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState } from "react";
@@ -60,6 +61,7 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (t
         <input className="field" placeholder="Username" value={u} onChange={(e) => setU(e.target.value)} autoComplete="off" />
         <input className="field" type="password" placeholder="Password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="new-password" />
         <Button type="submit" className="btn-glow w-full" disabled={busy || !u || !p}>{busy ? "Signing in…" : "Sign in"}</Button>
+        <SetupStatus />
       </form>
     </div>
   );
