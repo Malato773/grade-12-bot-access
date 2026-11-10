@@ -71,7 +71,7 @@ export type Database = {
           notification_id: string
           retry_after: string | null
           retry_of: string | null
-          retryable: boolean
+          retryable: boolean | null
           status: string
           telegram_handle: string | null
           telegram_message_id: number | null
@@ -87,7 +87,7 @@ export type Database = {
           notification_id: string
           retry_after?: string | null
           retry_of?: string | null
-          retryable?: boolean
+          retryable?: boolean | null
           status?: string
           telegram_handle?: string | null
           telegram_message_id?: number | null
@@ -103,7 +103,7 @@ export type Database = {
           notification_id?: string
           retry_after?: string | null
           retry_of?: string | null
-          retryable?: boolean
+          retryable?: boolean | null
           status?: string
           telegram_handle?: string | null
           telegram_message_id?: number | null
@@ -114,13 +114,6 @@ export type Database = {
             columns: ["notification_id"]
             isOneToOne: false
             referencedRelation: "bot_notifications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bot_deliveries_retry_of_fkey"
-            columns: ["retry_of"]
-            isOneToOne: false
-            referencedRelation: "bot_deliveries"
             referencedColumns: ["id"]
           },
         ]
@@ -397,7 +390,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      claim_bot_delivery_retry: { Args: { delivery_id: string }; Returns: Json }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
