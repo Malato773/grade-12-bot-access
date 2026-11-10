@@ -14,7 +14,377 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          resolved: boolean
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          message: string
+          resolved?: boolean
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          resolved?: boolean
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      bot_deliveries: {
+        Row: {
+          attempted_at: string
+          chat_id: number | null
+          completed_at: string | null
+          display_name: string | null
+          error_code: number | null
+          error_message: string | null
+          id: string
+          notification_id: string
+          retry_after: string | null
+          retry_of: string | null
+          retryable: boolean | null
+          status: string
+          telegram_handle: string | null
+          telegram_message_id: number | null
+        }
+        Insert: {
+          attempted_at?: string
+          chat_id?: number | null
+          completed_at?: string | null
+          display_name?: string | null
+          error_code?: number | null
+          error_message?: string | null
+          id?: string
+          notification_id: string
+          retry_after?: string | null
+          retry_of?: string | null
+          retryable?: boolean | null
+          status?: string
+          telegram_handle?: string | null
+          telegram_message_id?: number | null
+        }
+        Update: {
+          attempted_at?: string
+          chat_id?: number | null
+          completed_at?: string | null
+          display_name?: string | null
+          error_code?: number | null
+          error_message?: string | null
+          id?: string
+          notification_id?: string
+          retry_after?: string | null
+          retry_of?: string | null
+          retryable?: boolean | null
+          status?: string
+          telegram_handle?: string | null
+          telegram_message_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bot_deliveries_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "bot_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bot_notifications: {
+        Row: {
+          content_key: string
+          created_at: string
+          id: string
+          last_sent_at: string
+          message: string
+          payload: Json | null
+        }
+        Insert: {
+          content_key: string
+          created_at?: string
+          id?: string
+          last_sent_at?: string
+          message: string
+          payload?: Json | null
+        }
+        Update: {
+          content_key?: string
+          created_at?: string
+          id?: string
+          last_sent_at?: string
+          message?: string
+          payload?: Json | null
+        }
+        Relationships: []
+      }
+      exam_testers: {
+        Row: {
+          full_name: string
+          notified: boolean | null
+          section: string
+          selected: boolean
+          signed_up_at: string
+          telegram_handle: string
+        }
+        Insert: {
+          full_name: string
+          notified?: boolean | null
+          section: string
+          selected?: boolean
+          signed_up_at?: string
+          telegram_handle: string
+        }
+        Update: {
+          full_name?: string
+          notified?: boolean | null
+          section?: string
+          selected?: boolean
+          signed_up_at?: string
+          telegram_handle?: string
+        }
+        Relationships: []
+      }
+      parent_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          gender: string | null
+          id: string
+          parent_name: string
+          status: string
+          student_name: string
+          telegram_handle: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          gender?: string | null
+          id?: string
+          parent_name: string
+          status?: string
+          student_name: string
+          telegram_handle: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          gender?: string | null
+          id?: string
+          parent_name?: string
+          status?: string
+          student_name?: string
+          telegram_handle?: string
+        }
+        Relationships: []
+      }
+      portal_registrations: {
+        Row: {
+          full_name: string
+          gender: string | null
+          id: string
+          kind: string
+          registered_at: string
+          source_key: string
+          telegram_handle: string | null
+        }
+        Insert: {
+          full_name: string
+          gender?: string | null
+          id?: string
+          kind: string
+          registered_at: string
+          source_key: string
+          telegram_handle?: string | null
+        }
+        Update: {
+          full_name?: string
+          gender?: string | null
+          id?: string
+          kind?: string
+          registered_at?: string
+          source_key?: string
+          telegram_handle?: string | null
+        }
+        Relationships: []
+      }
+      roster_entries: {
+        Row: {
+          created_at: string
+          grade: string | null
+          id: string
+          kind: string
+          name: string
+          section: string | null
+          stream: string | null
+        }
+        Insert: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          kind: string
+          name: string
+          section?: string | null
+          stream?: string | null
+        }
+        Update: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          section?: string | null
+          stream?: string | null
+        }
+        Relationships: []
+      }
+      roster_removals: {
+        Row: {
+          kind: string
+          name_norm: string
+          removed_at: string
+        }
+        Insert: {
+          kind: string
+          name_norm: string
+          removed_at?: string
+        }
+        Update: {
+          kind?: string
+          name_norm?: string
+          removed_at?: string
+        }
+        Relationships: []
+      }
+      student_joins: {
+        Row: {
+          full_name: string
+          gender: string | null
+          grade: string
+          joined_at: string
+          section: string
+          stream: string | null
+          telegram_handle: string
+        }
+        Insert: {
+          full_name: string
+          gender?: string | null
+          grade: string
+          joined_at?: string
+          section: string
+          stream?: string | null
+          telegram_handle: string
+        }
+        Update: {
+          full_name?: string
+          gender?: string | null
+          grade?: string
+          joined_at?: string
+          section?: string
+          stream?: string | null
+          telegram_handle?: string
+        }
+        Relationships: []
+      }
+      teacher_access: {
+        Row: {
+          accessed_at: string
+          full_name: string
+          gender: string | null
+          id: string
+          telegram_handle: string
+        }
+        Insert: {
+          accessed_at?: string
+          full_name: string
+          gender?: string | null
+          id?: string
+          telegram_handle: string
+        }
+        Update: {
+          accessed_at?: string
+          full_name?: string
+          gender?: string | null
+          id?: string
+          telegram_handle?: string
+        }
+        Relationships: []
+      }
+      telegram_users: {
+        Row: {
+          chat_id: number
+          first_name: string | null
+          first_seen: string
+          username: string | null
+        }
+        Insert: {
+          chat_id: number
+          first_name?: string | null
+          first_seen?: string
+          username?: string | null
+        }
+        Update: {
+          chat_id?: number
+          first_name?: string | null
+          first_seen?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      verification_attempts: {
+        Row: {
+          banned: boolean
+          banned_at: string | null
+          display_name: string
+          failed_count: number
+          last_attempt_at: string
+          subject: string
+        }
+        Insert: {
+          banned?: boolean
+          banned_at?: string | null
+          display_name: string
+          failed_count?: number
+          last_attempt_at?: string
+          subject: string
+        }
+        Update: {
+          banned?: boolean
+          banned_at?: string | null
+          display_name?: string
+          failed_count?: number
+          last_attempt_at?: string
+          subject?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
