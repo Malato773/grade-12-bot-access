@@ -708,7 +708,7 @@ export const adminExamBotEntries = createServerFn({ method: "POST" })
 export const getSetupStatus = createServerFn({ method: "GET" }).handler(async () => {
   const has = (k: string) => !!process.env[k];
   const keys = {
-    database: has("SUPABASE_URL") && has("SUPABASE_SERVICE_ROLE_KEY"),
+    database: (has("SUPABASE_URL") || has("VITE_SUPABASE_URL")) && (has("SUPABASE_SERVICE_ROLE_KEY") || has("DB_SERVICE_ROLE_KEY")),
     admin_login: has("ADMIN_USERNAME") && has("ADMIN_PASSWORD"),
     session: has("ADMIN_SESSION_SECRET"),
     bot: has("TELEGRAM_BOT_TOKEN"),
