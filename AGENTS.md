@@ -19,4 +19,4 @@
 - All app bot sendMessage calls pass through telegramCall to persist a content-grouped notification and each delivery outcome before returning; this makes failed and blocked deliveries auditable. Out-of-app broadcasts must also write these records.
 - Registration history is an append-preserved archive populated by database triggers and backfilled from existing registrations; resetting joins or deleting requests must not erase historical registration dates.
 - Admin record views use token-validated paginated server functions and nullable explicit gender values; existing users are never assigned an inferred gender.
-- The admin database key may come from SUPABASE_SERVICE_ROLE_KEY or DB_SERVICE_ROLE_KEY (the SUPABASE_ prefix is reserved for project secrets here); the login screen shows a presence-only setup checklist.
+- The login screen shows a presence-only setup checklist (keys present + live database/bot check), never secret values.
