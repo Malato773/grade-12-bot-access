@@ -20,3 +20,4 @@
 - Registration history is an append-preserved archive populated by database triggers and backfilled from existing registrations; resetting joins or deleting requests must not erase historical registration dates.
 - Admin record views use token-validated paginated server functions and nullable explicit gender values; existing users are never assigned an inferred gender.
 - The login screen shows a presence-only setup checklist (keys present + live database/bot check), never secret values.
+- Vercel forwards all paths to this project's published Lovable app rather than building a separate server; this keeps server-function manifests, managed credentials, and existing data together without exporting inaccessible Cloud keys.
