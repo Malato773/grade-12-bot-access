@@ -1,14 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
 import { PARENT_GROUP_LINK } from "@/lib/parent-rules";
-
-const PORTAL_URL = "https://bhsss-verifications.vercel.app/";
-const PORTAL_BUTTON = {
-  inline_keyboard: [
-    [{ text: "Open verification portal", web_app: { url: PORTAL_URL } }],
-    [{ text: "Grade 12: Test the exam portal", web_app: { url: `${PORTAL_URL}?tab=examtest` } }],
-  ],
-};
+import { PORTAL_BUTTONS } from "@/lib/portal-links";
 
 function expectedSecret(token: string) {
   return createHash("sha256").update(`tg-webhook:${token}`).digest("base64url");
@@ -39,7 +32,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           await telegramCall("sendMessage", {
             chat_id: chatId,
             text: "Please verify on the official portal.",
-            reply_markup: PORTAL_BUTTON,
+            reply_markup: PORTAL_BUTTONS,
           });
           return Response.json({ ok: true });
         }
@@ -48,7 +41,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         await telegramCall("sendMessage", {
           chat_id: chatId,
           text: `👋 Welcome ${name}, to the official Burka Harbu Special Secondary School bot.\n\nStudents, teachers and parents can verify using the button below.`,
-          reply_markup: PORTAL_BUTTON,
+          reply_markup: PORTAL_BUTTONS,
         });
 
         if (username) {

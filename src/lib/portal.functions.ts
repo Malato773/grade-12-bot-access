@@ -19,6 +19,7 @@ import {
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { hasApprovedParent, PARENT_GROUP_LINK } from "./parent-rules";
 import { genderSchema } from "./admin-record-rules";
+import { PORTAL_BUTTONS } from "./portal-links";
 
 async function rosterSections() {
   const { students } = await loadRoster();
@@ -504,7 +505,7 @@ export const adminBroadcast = createServerFn({ method: "POST" })
       list = list.filter((u) => u.username && wanted.delete(u.username.toLowerCase()));
       notFound = [...wanted.values()];
     }
-    const reply_markup = data.withButton ? { inline_keyboard: [[{ text: "Open verification portal", web_app: { url: "https://bhsss-verifications.vercel.app/" } }]] } : undefined;
+    const reply_markup = data.withButton ? PORTAL_BUTTONS : undefined;
     let sent = 0, failed = 0;
     for (let i = 0; i < list.length; i += 10) {
       const results = await Promise.all(list.slice(i, i + 10).map((u) =>

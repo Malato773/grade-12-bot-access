@@ -21,3 +21,4 @@
 - Admin record views use token-validated paginated server functions and nullable explicit gender values; existing users are never assigned an inferred gender.
 - The login screen shows a presence-only setup checklist (keys present + live database/bot check), never secret values.
 - Vercel forwards all paths to this project's published Lovable app rather than building a separate server; this keeps server-function manifests, managed credentials, and existing data together without exporting inaccessible Cloud keys.
+- Telegram start replies and optional broadcast buttons share portal-links.ts so their destinations cannot drift; the Grade 12 query opens the existing exam bot flow.

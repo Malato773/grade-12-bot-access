@@ -43,7 +43,8 @@ function Index() {
   const [examVisible, setExamVisible] = useState(true);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("tab") === "examtest") setTab("examtest");
+    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+    if (requestedTab === "examtest" || requestedTab === "exambot") setTab(requestedTab);
     getPublicSettings().then((s) => { setSupport(s.support_handle); setSections(s.sections); setExamVisible(s.exam_test_visible); }).catch(() => {});
   }, []);
 
