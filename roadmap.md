@@ -10,5 +10,5 @@
 - [x] Grade 12 exam portal bot page (name → Telegram username → @BHSSS_EXAM_PORTAL_BOT link) with admin "exam bot" list.
 - [x] Connect Lovable Cloud and merge the exported records without deleting existing data.
 - [x] Configure Vercel to forward pages, assets, and server functions to the same published portal.
-- [ ] Merge the November 12 exports without deleting existing records or losing registration dates.
-- [ ] Point Telegram verification and Grade 12 buttons to the published Lovable portal and connect the bot webhook there.
+- [x] Merge the November 12 exports without deleting existing records or losing registration dates; all uploaded record keys verified present.
+- [x] Point Telegram verification and Grade 12 buttons to the published Lovable portal and connect the bot webhook there; live page, signed webhook, registered webhook, and menu verified.
