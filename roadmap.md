@@ -12,3 +12,4 @@
 - [x] Configure Vercel to forward pages, assets, and server functions to the same published portal.
 - [x] Merge the November 12 exports without deleting existing records or losing registration dates; all uploaded record keys verified present.
 - [x] Point Telegram verification and Grade 12 buttons to the published Lovable portal and connect the bot webhook there; live page, signed webhook, registered webhook, and menu verified.
+- [x] Add exam bot username editing/reset, student-record matching, duplicate protection, and returning-student access; rule tests and signed-in admin/returning-student checks passed.

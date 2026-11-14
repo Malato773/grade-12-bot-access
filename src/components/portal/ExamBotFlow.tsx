@@ -34,6 +34,8 @@ export function ExamBotFlow({ supportUrl }: { supportUrl: string }) {
       const r = await enter({ data: { name: student?.name ?? name, handle } });
       if (r.ok) { setLink(r.link); setStep("done"); }
       else if (r.reason === "not_in_bot") toast.error("This username hasn't started our school bot yet. Open the school bot, press Start, then try again.", help);
+      else if (r.reason === "username_mismatch") toast.error("This username does not match the username saved beside your name in the student list.", help);
+      else if (r.reason === "duplicate_username") toast.error("This username is already registered to another student.", help);
       else toast.error("This page is only for Grade 12 students.", help);
     } catch { toast.error("Please try again."); } finally { setBusy(false); }
   }
@@ -51,7 +53,7 @@ export function ExamBotFlow({ supportUrl }: { supportUrl: string }) {
       {step === "handle" && student && (
         <form onSubmit={submitHandle} className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Hi <span className="font-semibold text-foreground">{student.name}</span> (12{student.section}). Step 2 of 2 — enter the Telegram username you registered with our bot.
+            Hi <span className="font-semibold text-foreground">{student.name}</span> (12{student.section}). Enter your Telegram username exactly as saved in your student registration and the school bot.
           </p>
           <input className="field" value={handle} onChange={(e) => setHandle(e.target.value)} maxLength={33} placeholder="@telegram username" autoFocus />
           <button className="btn-glow w-full" disabled={busy}>{busy ? "Checking…" : "Get the bot link"}</button>

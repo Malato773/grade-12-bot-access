@@ -20,6 +20,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { hasApprovedParent, PARENT_GROUP_LINK } from "./parent-rules";
 import { genderSchema } from "./admin-record-rules";
 import { PORTAL_BUTTONS } from "./portal-links";
+import { examEntryDecision, matchesStudentRegistration, type ExamBotEntry } from "./exam-bot-rules";
 
 async function rosterSections() {
   const { students } = await loadRoster();
@@ -681,16 +682,29 @@ export const enterExamPortalBot = createServerFn({ method: "POST" })
     if (!s) return { ok: false as const, reason: "not_grade12" as const };
     const db = await getDb();
     const bare = data.handle.replace(/^@/, "");
-    const { data: users } = await db.from("telegram_users").select("chat_id,username").ilike("username", bare).limit(1);
+    const { data: joins, error: joinError } = await db.from("student_joins").select("full_name,telegram_handle").eq("grade", "12");
+    if (joinError) throw new Error("Could not check student registration");
+    if (!matchesStudentRegistration(s.name, data.handle, joins ?? [])) return { ok: false as const, reason: "username_mismatch" as const };
+    const { data: users, error: userError } = await db.from("telegram_users").select("chat_id,username").ilike("username", bare.replace(/_/g, "\\_")).limit(1);
+    if (userError) throw new Error("Could not check bot registration");
     const u = users?.[0];
     if (!u) return { ok: false as const, reason: "not_in_bot" as const };
     // Stored in app_settings (key per handle) so no schema change is needed on the existing database.
     const tg = `@${u.username ?? bare}`;
-    const { error } = await db.from("app_settings").upsert({
+    const key = `${EXAM_BOT_PREFIX}${tg.toLowerCase()}`;
+    const { data: existing, error: readError } = await db.from("app_settings").select("value").eq("key", key).maybeSingle();
+    if (readError) throw new Error("Could not check entry");
+    const decision = examEntryDecision(existing ? JSON.parse(existing.value) as ExamBotEntry : null, s.name);
+    if (decision === "duplicate") return { ok: false as const, reason: "duplicate_username" as const };
+    if (decision === "returning") return { ok: true as const, name: s.name, link: `https://t.me/${EXAM_PORTAL_BOT}` };
+    const { error } = await db.from("app_settings").insert({
       key: `${EXAM_BOT_PREFIX}${tg.toLowerCase()}`,
       value: JSON.stringify({ telegram_handle: tg, full_name: s.name, section: s.section, chat_id: u.chat_id, entered_at: new Date().toISOString() }),
     });
-    if (error) console.error("exam bot entry save failed", error);
+    if (error?.code === "23505") {
+      const { data: concurrent } = await db.from("app_settings").select("value").eq("key", key).maybeSingle();
+      if (!concurrent || examEntryDecision(JSON.parse(concurrent.value) as ExamBotEntry, s.name) !== "returning") return { ok: false as const, reason: "duplicate_username" as const };
+    } else if (error) throw new Error("Could not save exam entry");
     return { ok: true as const, name: s.name, link: `https://t.me/${EXAM_PORTAL_BOT}` };
   });
 
@@ -701,8 +715,43 @@ export const adminExamBotEntries = createServerFn({ method: "POST" })
     const db = await getDb();
     const { data: rows, error } = await db.from("app_settings").select("value").like("key", `${EXAM_BOT_PREFIX}%`);
     if (error) throw new Error("Could not load entries");
-    const list = (rows ?? []).flatMap((r) => { try { return [JSON.parse(r.value) as { telegram_handle: string; full_name: string; section: string; entered_at: string }]; } catch { return []; } });
-    return list.sort((a, b) => b.entered_at.localeCompare(a.entered_at));
+    const list = (rows ?? []).flatMap((r) => { try { return [JSON.parse(r.value) as ExamBotEntry]; } catch { return []; } });
+    const { data: joins, error: joinError } = await db.from("student_joins").select("full_name,telegram_handle").eq("grade", "12");
+    if (joinError) throw new Error("Could not check student records");
+    return list.sort((a, b) => b.entered_at.localeCompare(a.entered_at)).map((r) => ({ ...r, username_matches: matchesStudentRegistration(r.full_name, r.telegram_handle, joins ?? []) }));
+  });
+
+export const adminEditExamBotEntry = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ token: tokenSchema.shape.token, oldHandle: handle, handle }).parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.token);
+    const db = await getDb();
+    const oldKey = `${EXAM_BOT_PREFIX}${data.oldHandle.toLowerCase()}`;
+    const { data: row, error: readError } = await db.from("app_settings").select("value").eq("key", oldKey).maybeSingle();
+    if (readError || !row) throw new Error("Entry not found");
+    const { data: users, error: userError } = await db.from("telegram_users").select("chat_id,username").ilike("username", data.handle.slice(1).replace(/_/g, "\\_")).limit(1);
+    if (userError) throw new Error("Could not check bot registration");
+    const user = users?.[0];
+    if (!user) return { ok: false as const, reason: "not_in_bot" };
+    const newKey = `${EXAM_BOT_PREFIX}${data.handle.toLowerCase()}`;
+    if (newKey === oldKey) return { ok: true as const };
+    const value = JSON.stringify({ ...JSON.parse(row.value), telegram_handle: `@${user.username}`, chat_id: user.chat_id });
+    const { error } = await db.from("app_settings").insert({ key: newKey, value });
+    if (error?.code === "23505") return { ok: false as const, reason: "duplicate_username" };
+    if (error) throw new Error("Could not save username");
+    const { error: deleteError } = await db.from("app_settings").delete().eq("key", oldKey).eq("value", row.value);
+    if (deleteError) throw new Error("Username saved but old entry could not be removed");
+    return { ok: true as const };
+  });
+
+export const adminResetExamBotEntry = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ token: tokenSchema.shape.token, handle }).parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.token);
+    const db = await getDb();
+    const { error } = await db.from("app_settings").delete().eq("key", `${EXAM_BOT_PREFIX}${data.handle.toLowerCase()}`);
+    if (error) throw new Error("Could not reset entry");
+    return { ok: true };
   });
 
 // ---------- Setup status: reports only whether each key is present and working, never values ----------
